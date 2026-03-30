@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mentor Course — 8 Pillars Dashboard</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f3;
+  --color-background-tertiary: #eeece8;
+  --color-text-primary: #1a1a18;
+  --color-text-secondary: #6b6b65;
+  --color-text-tertiary: #9b9b94;
+  --color-border-tertiary: rgba(0,0,0,0.10);
+  --color-border-secondary: rgba(0,0,0,0.18);
+  --color-border-primary: rgba(0,0,0,0.28);
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --font-sans: system-ui, -apple-system, sans-serif;
+}
+body { font-family: var(--font-sans); background: #f8f7f4; color: var(--color-text-primary); min-height: 100vh; padding: 1.5rem; }
+.container { max-width: 760px; margin: 0 auto; }
+h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+.subtitle { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+
+.tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab { padding: 7px 16px; border-radius: 999px; border: 0.5px solid rgba(0,0,0,0.18); font-size: 13px; background: #fff; color: var(--color-text-secondary); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.tab.active { background: var(--color-text-primary); color: #fff; border-color: transparent; }
+.tab:hover:not(.active) { background: var(--color-background-secondary); color: var(--color-text-primary); }
+
+.view { display: none; }
+.view.active { display: block; }
+
+.section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.09em; color: var(--color-text-tertiary); text-transform: uppercase; margin-bottom: 10px; margin-top: 1.5rem; }
+.section-label:first-child { margin-top: 0; }
+
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px; }
+.card:hover { border-color: var(--color-border-secondary); }
+
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+.stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 0.875rem 0.75rem; text-align: center; }
+.stat-num { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.stat-label { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.3; }
+
+.pillar-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+.pillar-card { border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); padding: 1rem; cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden; }
+.pillar-card:hover { transform: translateY(-1px); border-color: var(--color-border-secondary); }
+.pillar-icon { font-size: 22px; margin-bottom: 6px; }
+.pillar-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.pillar-sub { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; line-height: 1.4; }
+.pillar-count { position: absolute; top: 10px; right: 10px; font-size: 11px; color: var(--color-text-tertiary); }
+
+.week-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
+.week-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; cursor: pointer; border: 0.5px solid var(--color-border-tertiary); transition: all 0.15s; border-left-width: 3px; }
+.week-card:hover { background: var(--color-background-primary); border-color: var(--color-border-secondary); }
+.week-num { font-size: 10px; color: var(--color-text-tertiary); margin-bottom: 3px; }
+.week-title { font-size: 12px; font-weight: 500; color: var(--color-text-primary); line-height: 1.3; }
+.week-tag { font-size: 10px; color: var(--color-text-secondary); margin-top: 3px; }
+
+.act-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.act-row:last-child { border-bottom: none; }
+.act-icon { width: 34px; height: 34px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.act-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.act-meta { font-size: 12px; color: var(--color-text-secondary); margin-top: 1px; line-height: 1.4; }
+.act-badge { font-size: 10px; padding: 2px 7px; border-radius: 999px; margin-top: 4px; display: inline-block; }
+
+.ritual-card { border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); padding: 1rem 1.25rem; margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start; background: var(--color-background-secondary); }
+.ritual-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.38); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+.overlay.open { display: flex; }
+.overlay-box { background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid rgba(0,0,0,0.18); padding: 1.5rem; max-width: 440px; width: 100%; max-height: 80vh; overflow-y: auto; }
+.overlay-close { float: right; cursor: pointer; color: var(--color-text-tertiary); font-size: 18px; line-height: 1; margin-left: 8px; }
+.module-li { display: flex; gap: 8px; padding: 6px 0; font-size: 13px; color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); align-items: flex-start; }
+.module-li:last-child { border-bottom: none; }
+.dot6 { width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+
+.resource-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+.resource-row:last-child { border-bottom: none; }
+.resource-tag { font-size: 10px; padding: 2px 8px; border-radius: 999px; }
+
+.design-principle { margin-bottom: 8px; font-size: 13px; line-height: 1.7; color: var(--color-text-secondary); }
+.design-principle strong { color: var(--color-text-primary); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Mentor Course Dashboard</h1>
+  <p class="subtitle">8 pillars · 48 sessions · Phone-friendly · Muslim girls aged 14–15</p>
+
+  <div class="tabs">
+    <div class="tab active" onclick="sw('overview',this)">Overview</div>
+    <div class="tab" onclick="sw('roadmap',this)">Roadmap</div>
+    <div class="tab" onclick="sw('activities',this)">Activities</div>
+    <div class="tab" onclick="sw('rituals',this)">Daily rituals</div>
+    <div class="tab" onclick="sw('resources',this)">Resources</div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="view active" id="v-overview">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">8</div><div class="stat-label">Life pillars</div></div>
+      <div class="stat-card"><div class="stat-num">48</div><div class="stat-label">Sessions</div></div>
+      <div class="stat-card"><div class="stat-num">45m</div><div class="stat-label">Per session</div></div>
+      <div class="stat-card"><div class="stat-num">100%</div><div class="stat-label">Phone-friendly</div></div>
+    </div>
+    <div class="section-label">The 8 pillars</div>
+    <div class="pillar-grid" id="pillar-grid"></div>
+    <div class="section-label">Design principles</div>
+    <div class="card">
+      <div class="design-principle"><strong>Practice over theory.</strong> Every session: 10 min concept, 30 min doing, 5 min reflection. Students never just listen.</div>
+      <div class="design-principle"><strong>Islam is the spine.</strong> Not a separate subject — values like modesty, gratitude, discipline, and care for others are woven into every pillar.</div>
+      <div class="design-principle"><strong>Phone-first.</strong> Every activity works on an Android phone with an AI app. No laptop, no peer needed.</div>
+      <div class="design-principle"><strong>Solo but not lonely.</strong> Activities are designed for one person — journaling, AI conversations, voice recordings, observations.</div>
+      <div class="design-principle" style="margin-bottom:0;"><strong>Rituals compound.</strong> A 5-min daily ritual shared across sessions builds the habits that outlast the course.</div>
+    </div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="view" id="v-roadmap">
+    <div id="roadmap-content"></div>
+  </div>
+
+  <!-- ACTIVITIES -->
+  <div class="view" id="v-activities">
+    <div id="act-filter" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;"></div>
+    <div id="act-list"></div>
+  </div>
+
+  <!-- RITUALS -->
+  <div class="view" id="v-rituals">
+    <div class="section-label">Morning ritual (5 min)</div>
+    <div class="ritual-card"><div class="ritual-num" style="background:#E1F5EE;color:#0F6E56;">1</div><div><div style="font-size:13px;font-weight:500;">Bismillah intention</div><div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Set one intention for the day out loud or in a voice note. Connects Islamic practice to daily action.</div></div></div>
+    <div class="ritual-card"><div class="ritual-num" style="background:#EEEDFE;color:#3C3489;">2</div><div><div style="font-size:13px;font-weight:500;">One sentence journal</div><div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Type one sentence in their notes app: "Today I want to feel ___." Builds self-awareness over weeks.</div></div></div>
+    <div class="section-label">Evening ritual (5 min)</div>
+    <div class="ritual-card"><div class="ritual-num" style="background:#FAEEDA;color:#633806;">3</div><div><div style="font-size:13px;font-weight:500;">3 wins + 1 struggle</div><div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Voice note or written. Three things that went well, one thing that was hard. No fixing, just noticing.</div></div></div>
+    <div class="ritual-card"><div class="ritual-num" style="background:#E6F1FB;color:#185FA5;">4</div><div><div style="font-size:13px;font-weight:500;">One Alhamdulillah</div><div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Name one specific thing to be grateful for. Not generic — must be something from today. Trains the gratitude muscle.</div></div></div>
+    <div class="section-label">Weekly ritual (10 min, on session day)</div>
+    <div class="ritual-card"><div class="ritual-num" style="background:#FBEAF0;color:#4B1528;">5</div><div><div style="font-size:13px;font-weight:500;">Weekly reflection question</div><div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Each session ends with one question they answer in writing and share with the mentor. Builds accountability without pressure.</div></div></div>
+    <div class="ritual-card"><div class="ritual-num" style="background:#EAF3DE;color:#27500A;">6</div><div><div style="font-size:13px;font-weight:500;">Skill proof</div><div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">One tangible output per session — a voice recording, a written paragraph, a screenshot, a drawing. Evidence of learning.</div></div></div>
+    <div class="section-label">Why rituals matter</div>
+    <div class="card" style="font-size:13px;line-height:1.7;color:var(--color-text-secondary);">The rituals are more important than the sessions. A student who misses a session but keeps the morning ritual is still growing. Introduce all rituals in week 1. Revisit and celebrate them every 4 weeks.</div>
+  </div>
+
+  <!-- RESOURCES -->
+  <div class="view" id="v-resources">
+    <div class="section-label">Phone apps (free, Android)</div>
+    <div class="card">
+      <div class="resource-row"><span>Google Gemini / ChatGPT</span><span class="resource-tag" style="background:#E6F1FB;color:#185FA5;">AI companion</span></div>
+      <div class="resource-row"><span>Google Keep / Samsung Notes</span><span class="resource-tag" style="background:#EEEDFE;color:#3C3489;">Journaling</span></div>
+      <div class="resource-row"><span>Voice Recorder (built-in)</span><span class="resource-tag" style="background:#E1F5EE;color:#0F6E56;">Speaking practice</span></div>
+      <div class="resource-row"><span>YouTube (offline download)</span><span class="resource-tag" style="background:#FAECE7;color:#712B13;">Video learning</span></div>
+      <div class="resource-row"><span>Muslim Pro / Quran app</span><span class="resource-tag" style="background:#FAEEDA;color:#633806;">Islamic practice</span></div>
+      <div class="resource-row"><span>Google Docs</span><span class="resource-tag" style="background:#EAF3DE;color:#27500A;">Writing & portfolio</span></div>
+      <div class="resource-row"><span>Canva (mobile)</span><span class="resource-tag" style="background:#FBEAF0;color:#4B1528;">Creative projects</span></div>
+    </div>
+    <div class="section-label">Activity formats (no laptop needed)</div>
+    <div class="card">
+      <div class="resource-row"><span>Voice notes (self-reflection, speaking)</span><span class="resource-tag" style="background:#E1F5EE;color:#0F6E56;">Built-in</span></div>
+      <div class="resource-row"><span>AI conversations (practice, research)</span><span class="resource-tag" style="background:#E6F1FB;color:#185FA5;">Free app</span></div>
+      <div class="resource-row"><span>Google Doc journal (ongoing)</span><span class="resource-tag" style="background:#EEEDFE;color:#3C3489;">Free</span></div>
+      <div class="resource-row"><span>Photo observation tasks</span><span class="resource-tag" style="background:#FAEEDA;color:#633806;">Camera</span></div>
+      <div class="resource-row"><span>Short paragraph writing (shared)</span><span class="resource-tag" style="background:#EAF3DE;color:#27500A;">Google Doc</span></div>
+      <div class="resource-row"><span>Reading + annotating on phone</span><span class="resource-tag" style="background:#FAECE7;color:#712B13;">Browser</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeOverlay(event)">
+  <div class="overlay-box" id="overlay-box">
+    <span class="overlay-close" onclick="document.getElementById('overlay').classList.remove('open')">✕</span>
+    <div id="overlay-content"></div>
+  </div>
+</div>
+
+<script>
+const pillars = [
+  { id:'comm', icon:'🗣️', name:'Communication', sub:'Confidence · Clarity · Speaking · Listening', color:'#1D9E75', bg:'#E1F5EE', sessions:6, topics:['How to introduce yourself confidently','Speaking without filler words','Listening as a skill (not just waiting)','Clarity: saying exactly what you mean','Giving feedback kindly','Disagreeing without hurting'] },
+  { id:'learn', icon:'📚', name:'Learning how to learn', sub:'Methods · Mindset · Memory · Focus', color:'#BA7517', bg:'#FAEEDA', sessions:6, topics:['How memory actually works','Active recall vs passive reading','The Pomodoro method on phone','Note-taking that helps you think','Learning from mistakes','Making AI your study partner'] },
+  { id:'mindful', icon:'🌿', name:'Mindfulness', sub:'Present moment · Breath · Awareness', color:'#1D9E75', bg:'#E1F5EE', sessions:5, topics:["What mindfulness actually is (and isn't)",'Breathing as an anchor','Noticing without judging','Mindful eating, walking, listening','The Islamic roots of mindfulness','Phone addiction and presence'] },
+  { id:'islam', icon:'☪️', name:'Islam', sub:'Fundamentals · Character · Modesty · Purpose', color:'#BA7517', bg:'#FAEEDA', sessions:7, topics:['Why do I believe what I believe?','Character is the real worship','Modesty from the inside out','Dealing with peer pressure Islamically','Gratitude as a daily practice','Reading the Quran with understanding','Finding purpose as a young Muslim woman'] },
+  { id:'english', icon:'✍️', name:'English', sub:'Reading · Writing · Speaking · Listening', color:'#378ADD', bg:'#E6F1FB', sessions:7, topics:['Reading 10 pages a day (habit)','Writing one paragraph daily','Vocabulary through context','Speaking clearly on voice notes','Listening to podcasts with purpose','Writing emails and messages professionally','Storytelling in English'] },
+  { id:'tech', icon:'💻', name:'Tech literacy', sub:'AI · Productivity · Digital ethics', color:'#7F77DD', bg:'#EEEDFE', sessions:6, topics:["What AI can and can't do",'Using AI to learn, not to cheat','Your digital footprint','Fake news and media literacy','Productivity tools on your phone','Screen time: designing your own limits','Being safe online as a girl'] },
+  { id:'mindset', icon:'🧠', name:'Mindset', sub:'Habits · EQ · Resilience · Growth', color:'#D85A30', bg:'#FAECE7', sessions:6, topics:['Growth mindset: the science','Building a habit that sticks','Emotional intelligence basics','Handling failure without shame','Resilience: what makes people bounce back','Decision-making under pressure'] },
+  { id:'health', icon:'💚', name:'Health', sub:'Physical · Mental · Sleep · Energy', color:'#639922', bg:'#EAF3DE', sessions:5, topics:['Sleep is not optional: why it matters','Movement without a gym','Eating with consciousness (Islamic lens)','Mental health: it\'s okay not to be okay','Stress vs anxiety: knowing the difference','Energy management, not time management'] },
+];
+
+function renderPillars() {
+  const g = document.getElementById('pillar-grid');
+  pillars.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'pillar-card';
+    d.style.background = p.bg + '33';
+    d.innerHTML = `<div class="pillar-count">${p.sessions} sessions</div><div class="pillar-icon">${p.icon}</div><div class="pillar-name">${p.name}</div><div class="pillar-sub">${p.sub}</div>`;
+    d.onclick = () => openPillar(p);
+    g.appendChild(d);
+  });
+}
+
+function openPillar(p) {
+  document.getElementById('overlay-content').innerHTML = `
+    <div style="font-size:22px;margin-bottom:6px;">${p.icon}</div>
+    <div style="font-size:17px;font-weight:500;margin-bottom:4px;">${p.name}</div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px;">${p.sub} · ${p.sessions} sessions</div>
+    <div style="font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:8px;">Topics covered</div>
+    <ul style="list-style:none;">
+      ${p.topics.map(t => `<li class="module-li"><span class="dot6" style="background:${p.color};"></span>${t}</li>`).join('')}
+    </ul>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+const roadmap = [
+  { q:1, label:'Jan – Mar · Foundation', note:'Build the rituals, set the tone. Light theory, high excitement. Board exam months — keep sessions shorter and lighter.', sessions:[
+    {n:1,title:'Who am I?',pillar:'Communication',color:'#1D9E75'},
+    {n:2,title:'How my brain learns',pillar:'Learning to learn',color:'#BA7517'},
+    {n:3,title:'A breath and a moment',pillar:'Mindfulness',color:'#1D9E75'},
+    {n:4,title:'Why I am a Muslim',pillar:'Islam',color:'#BA7517'},
+    {n:5,title:'Read something today',pillar:'English',color:'#378ADD'},
+    {n:6,title:'What is AI really?',pillar:'Tech literacy',color:'#7F77DD'},
+    {n:7,title:'Growth mindset intro',pillar:'Mindset',color:'#D85A30'},
+    {n:8,title:'Sleep and your brain',pillar:'Health',color:'#639922'},
+    {n:9,title:'Speaking clearly',pillar:'Communication',color:'#1D9E75'},
+    {n:10,title:'Active recall practice',pillar:'Learning to learn',color:'#BA7517'},
+    {n:11,title:'Phone and presence',pillar:'Mindfulness',color:'#1D9E75'},
+    {n:12,title:'Character in Islam',pillar:'Islam',color:'#BA7517'},
+  ]},
+  { q:2, label:'Apr – Jun · Build', note:'Go deeper. Students have the habits now — apply them. Introduce harder reflections.', sessions:[
+    {n:13,title:'Listening as a skill',pillar:'Communication',color:'#1D9E75'},
+    {n:14,title:'Note-taking that works',pillar:'Learning to learn',color:'#BA7517'},
+    {n:15,title:'Noticing without judging',pillar:'Mindfulness',color:'#1D9E75'},
+    {n:16,title:'Modesty from inside',pillar:'Islam',color:'#BA7517'},
+    {n:17,title:'Write every day',pillar:'English',color:'#378ADD'},
+    {n:18,title:'Your digital footprint',pillar:'Tech literacy',color:'#7F77DD'},
+    {n:19,title:'Building one habit',pillar:'Mindset',color:'#D85A30'},
+    {n:20,title:'Movement and energy',pillar:'Health',color:'#639922'},
+    {n:21,title:'Giving feedback kindly',pillar:'Communication',color:'#1D9E75'},
+    {n:22,title:'Learn from mistakes',pillar:'Learning to learn',color:'#BA7517'},
+    {n:23,title:'Gratitude in Islam',pillar:'Islam',color:'#BA7517'},
+    {n:24,title:'Fake news detective',pillar:'Tech literacy',color:'#7F77DD'},
+  ]},
+  { q:3, label:'Jul – Sep · Apply', note:'Real-world application. Students create, share, and prove their skills. More projects.', sessions:[
+    {n:25,title:'Tell your story',pillar:'English',color:'#378ADD'},
+    {n:26,title:'Emotional intelligence',pillar:'Mindset',color:'#D85A30'},
+    {n:27,title:'Mindful eating',pillar:'Health',color:'#639922'},
+    {n:28,title:'Finding purpose',pillar:'Islam',color:'#BA7517'},
+    {n:29,title:'AI as study partner',pillar:'Tech literacy',color:'#7F77DD'},
+    {n:30,title:'Disagree well',pillar:'Communication',color:'#1D9E75'},
+    {n:31,title:'Focus and deep work',pillar:'Learning to learn',color:'#BA7517'},
+    {n:32,title:'Breathing as anchor',pillar:'Mindfulness',color:'#1D9E75'},
+    {n:33,title:'Handling failure',pillar:'Mindset',color:'#D85A30'},
+    {n:34,title:'Online safety for girls',pillar:'Tech literacy',color:'#7F77DD'},
+    {n:35,title:'Quran with meaning',pillar:'Islam',color:'#BA7517'},
+    {n:36,title:'Mental health matters',pillar:'Health',color:'#639922'},
+  ]},
+  { q:4, label:'Oct – Dec · Master', note:'Reflection, integration, and identity. Who have they become? Celebrate growth.', sessions:[
+    {n:37,title:'Vocabulary in context',pillar:'English',color:'#378ADD'},
+    {n:38,title:'Resilience stories',pillar:'Mindset',color:'#D85A30'},
+    {n:39,title:'Peer pressure (Islamic)',pillar:'Islam',color:'#BA7517'},
+    {n:40,title:'Design your screen time',pillar:'Tech literacy',color:'#7F77DD'},
+    {n:41,title:'Speak on voice note',pillar:'Communication',color:'#1D9E75'},
+    {n:42,title:'Memory palace',pillar:'Learning to learn',color:'#BA7517'},
+    {n:43,title:'Stress vs anxiety',pillar:'Health',color:'#639922'},
+    {n:44,title:'Present moment: Islam',pillar:'Mindfulness',color:'#1D9E75'},
+    {n:45,title:'Write professionally',pillar:'English',color:'#378ADD'},
+    {n:46,title:'Decision under pressure',pillar:'Mindset',color:'#D85A30'},
+    {n:47,title:'Who have I become?',pillar:'Islam + all',color:'#BA7517'},
+    {n:48,title:'The letter to myself',pillar:'All pillars',color:'#7F77DD'},
+  ]},
+];
+
+function renderRoadmap() {
+  const c = document.getElementById('roadmap-content');
+  roadmap.forEach(q => {
+    const label = document.createElement('div');
+    label.className = 'section-label';
+    label.style.marginTop = '1rem';
+    label.textContent = q.label;
+    c.appendChild(label);
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;line-height:1.5;';
+    note.textContent = q.note;
+    c.appendChild(note);
+    const grid = document.createElement('div');
+    grid.className = 'week-grid';
+    q.sessions.forEach(s => {
+      const w = document.createElement('div');
+      w.className = 'week-card';
+      w.style.borderLeftColor = s.color;
+      w.innerHTML = `<div class="week-num">Session ${s.n}</div><div class="week-title">${s.title}</div><div class="week-tag">${s.pillar}</div>`;
+      grid.appendChild(w);
+    });
+    c.appendChild(grid);
+  });
+}
+
+const activities = [
+  { title:'Voice note mirror', pillar:'Communication', icon:'🎙️', bg:'#E1F5EE', tc:'#0F6E56', phone:'Voice recorder app', desc:'Record yourself speaking for 90 seconds on a topic. Listen back. Notice one thing to improve next time.' },
+  { title:'AI conversation partner', pillar:'English', icon:'🤖', bg:'#E6F1FB', tc:'#185FA5', phone:'Gemini / ChatGPT', desc:'Have a 10-minute text conversation with AI on any topic. Try to use 5 new words. Screenshot your best sentence.' },
+  { title:'Fake news or real?', pillar:'Tech literacy', icon:'🔍', bg:'#EEEDFE', tc:'#3C3489', phone:'Browser + Google', desc:'Mentor sends 5 headlines. Students research each one and decide: real, misleading, or fake. Share verdict + reasoning.' },
+  { title:'Gratitude photo journal', pillar:'Mindfulness', icon:'📸', bg:'#E1F5EE', tc:'#0F6E56', phone:'Camera + notes app', desc:'Take one photo every day of something beautiful or meaningful. At end of week, write 3 sentences about what you noticed.' },
+  { title:'Quran reflection journal', pillar:'Islam', icon:'📖', bg:'#FAEEDA', tc:'#633806', phone:'Quran app + notes', desc:"Pick one ayah per week. Write what it means to you personally — not what a scholar says, what YOU feel." },
+  { title:'The recall test', pillar:'Learning to learn', icon:'🧩', bg:'#FAEEDA', tc:'#633806', phone:'Notes app', desc:'After any lesson or video, close it. Write down everything you remember without looking. Then check. This is how memory works.' },
+  { title:'One paragraph challenge', pillar:'English', icon:'✍️', bg:'#E6F1FB', tc:'#185FA5', phone:'Google Docs', desc:'Write one paragraph on any topic — 5 sentences minimum. Share with mentor. Focus on: one idea, clear sentences, no repeating.' },
+  { title:'Habit tracking streak', pillar:'Mindset', icon:'🔥', bg:'#FAECE7', tc:'#712B13', phone:'Notes / calendar', desc:'Pick ONE new habit. Track it daily for 21 days in a notes app. At day 7, 14, 21 — reflect: what made it easy or hard?' },
+  { title:'Body scan meditation', pillar:'Health', icon:'💚', bg:'#EAF3DE', tc:'#27500A', phone:'YouTube (audio)', desc:'5-minute body scan audio from YouTube. Students listen and write one sentence: "I noticed ___." Do it 3x per week.' },
+  { title:'Ask AI to debate you', pillar:'Tech literacy', icon:'⚡', bg:'#EEEDFE', tc:'#3C3489', phone:'Gemini / ChatGPT', desc:'Pick an opinion you hold. Ask AI to argue the opposite. Then write: did it change anything? This builds critical thinking.' },
+  { title:'The breathing reset', pillar:'Mindfulness', icon:'🌬️', bg:'#E1F5EE', tc:'#0F6E56', phone:'Just themselves', desc:'4-7-8 breathing: inhale 4 counts, hold 7, exhale 8. Do it 3 times before any stressful moment. Practice in session first.' },
+  { title:'Islamic character case study', pillar:'Islam', icon:'⭐', bg:'#FAEEDA', tc:'#633806', phone:'Browser / Quran app', desc:'Research one quality of Prophet Muhammad ﷺ. Find one moment from Seerah that shows it. Write: how can I apply this today?' },
+];
+
+let activeFilter = 'All';
+function renderActivities() {
+  const pillarsSet = ['All', ...new Set(activities.map(a => a.pillar))];
+  const fb = document.getElementById('act-filter');
+  pillarsSet.forEach(p => {
+    const b = document.createElement('div');
+    b.className = 'tab' + (p === 'All' ? ' active' : '');
+    b.textContent = p;
+    b.onclick = (e) => {
+      activeFilter = p;
+      document.querySelectorAll('#act-filter .tab').forEach(t => t.classList.remove('active'));
+      e.target.classList.add('active');
+      renderActList();
+    };
+    fb.appendChild(b);
+  });
+  renderActList();
+}
+
+function renderActList() {
+  const list = document.getElementById('act-list');
+  list.innerHTML = '';
+  const filtered = activeFilter === 'All' ? activities : activities.filter(a => a.pillar === activeFilter);
+  filtered.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="act-row" style="padding-top:0;">
+      <div class="act-icon" style="background:${a.bg};">${a.icon}</div>
+      <div style="flex:1;">
+        <div class="act-title">${a.title}</div>
+        <div class="act-meta">${a.desc}</div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <span class="act-badge" style="background:${a.bg};color:${a.tc};">${a.pillar}</span>
+          <span class="act-badge" style="background:var(--color-background-secondary);color:var(--color-text-secondary);">📱 ${a.phone}</span>
+        </div>
+      </div>
+    </div>`;
+    list.appendChild(card);
+  });
+}
+
+function sw(name, el) {
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('v-'+name).classList.add('active');
+}
+
+function closeOverlay(e) {
+  if(e.target === document.getElementById('overlay')) document.getElementById('overlay').classList.remove('open');
+}
+
+renderPillars();
+renderRoadmap();
+renderActivities();
+</script>
+</body>
+</html>
